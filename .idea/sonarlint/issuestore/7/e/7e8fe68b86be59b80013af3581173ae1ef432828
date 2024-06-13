@@ -1,0 +1,10 @@
+
+\
+java:S2095Y"FUse try-with-resources or close this "Workbook" in a "finally" clause.(‡¦ú
+W
+java:S1854"<Remove this useless assignment to local variable "mappings".(¯®Ò«ûÿÿÿÿ
+H
+java:S1481"-Remove this unused "mappings" local variable.(¯®Ò«ûÿÿÿÿ
+@	java:S1060"+Replace this use of System.out by a logger.(¨µ¤Ë
+G
+java:S14816"1Remove this unused "sourceObject" local variable.(èŒ¿
