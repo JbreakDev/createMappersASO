@@ -1,35 +1,10 @@
 package com.jesus.testapp;
 
-import org.apache.poi.ss.usermodel.*;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 public class CreateMapper {
-    public static void main(String[] args) throws IOException {
-        final Sheet sheet = readFile();
-        final List<String> keys = new ArrayList<>();
-        final List<String> values = new ArrayList<>();
-        final List<String> mappings = new ArrayList<>();
 
-
-        for (Row row : sheet) {
-            for (Cell cell : row) {
-                if (cell.getColumnIndex() == 0) {
-                    keys.add(cell.getStringCellValue());
-                } else {
-                    values.add(cell.getStringCellValue());
-                }
-            }
-        }
-
-        final Map<String, String> mappers = getMappers(keys, values);
-        generateMappingCommands(mappers);
-    }
-
-    private static void generateMappingCommands(Map<String, String> mappings) {
+    public static void generateMappingCommands(Map<String, String> mappings) {
         StringBuilder output = new StringBuilder();
 
         for (Map.Entry<String, String> entry : mappings.entrySet()) {
@@ -82,20 +57,6 @@ public class CreateMapper {
             return str;
         }
         return str.substring(0, 1).toUpperCase() + str.substring(1);
-    }
-
-    public static Map<String, String> getMappers(List<String> keys, List<String> values) {
-        final Map<String, String> mappers = new LinkedHashMap<>();
-        for (int i = 0; i < keys.size(); i++) {
-            mappers.put(keys.get(i), values.get(i));
-        }
-        return mappers;
-    }
-
-    public static Sheet readFile() throws IOException {
-        final InputStream inp = new FileInputStream("Mapping.xlsx");
-        final Workbook wb = WorkbookFactory.create(inp);
-        return wb.getSheetAt(0);
     }
     
 }
