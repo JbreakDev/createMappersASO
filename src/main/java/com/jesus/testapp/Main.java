@@ -1,5 +1,8 @@
 package com.jesus.testapp;
 
+import com.jesus.testapp.model.Mapper;
+import com.jesus.testapp.utils.CreateMapper;
+import com.jesus.testapp.utils.CreateMapperTests;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.FileInputStream;
@@ -8,26 +11,44 @@ import java.io.InputStream;
 import java.util.*;
 
 public class Main {
+
+    private static final String MESSAGE_DEFAULT = "Columna fuera de rango";
+
     public static void main(String[] args) throws IOException {
         final Sheet sheet = readFile();
-        final List<String> keys = new ArrayList<>();
-        final List<String> values = new ArrayList<>();
-
-        for (Row row : sheet) {
-            for (Cell cell : row) {
-                if (cell.getColumnIndex() == 0) {
-                    keys.add(cell.getStringCellValue());
-                } else {
-                    values.add(cell.getStringCellValue());
-                }
-            }
-        }
-
-        final Map<String, String> mappers = getMappers(keys, values);
-        printMenu(mappers);
+        final List<Mapper> mapperList = getMapperList(sheet);
+        printMenu(mapperList);
     }
 
-    public static void printMenu(Map<String, String> mappers) {
+    private static List<Mapper> getMapperList(Sheet sheet) {
+        final List<Mapper> mappers = new ArrayList<>();
+
+        for (Row row : sheet) {
+            int columnIndex = 0;
+            final Mapper mapper = new Mapper();
+            for (Cell cell : row) {
+                columnIndex = cell.getColumnIndex();
+                switch (columnIndex) {
+                    case 0:
+                        mapper.setFrom(cell.getStringCellValue());
+                        break;
+                    case 1:
+                        mapper.setTo(cell.getStringCellValue());
+                        break;
+                    case 2:
+                        mapper.setType(cell.getStringCellValue());
+                        break;
+                    default:
+                        System.out.println(MESSAGE_DEFAULT);
+                }
+            }
+            mappers.add(mapper);
+        }
+
+        return mappers;
+    }
+
+    public static void printMenu(List<Mapper> mappers) {
         boolean exit = true;
         Scanner scanner = new Scanner (System.in);
         int option = 0;
@@ -52,14 +73,6 @@ public class Main {
                     break;
             }
         }
-    }
-
-    public static Map<String, String> getMappers(List<String> keys, List<String> values) {
-        final Map<String, String> mappers = new LinkedHashMap<>();
-        for (int i = 0; i < keys.size(); i++) {
-            mappers.put(keys.get(i), values.get(i));
-        }
-        return mappers;
     }
 
     public static Sheet readFile() throws IOException {

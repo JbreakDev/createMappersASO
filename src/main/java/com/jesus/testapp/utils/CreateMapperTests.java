@@ -1,15 +1,18 @@
-package com.jesus.testapp;
+package com.jesus.testapp.utils;
 
+import com.jesus.testapp.model.Mapper;
+
+import java.util.List;
 import java.util.Map;
 
 public class CreateMapperTests {
 
-    public static void generateMappingTestCommands(Map<String, String> mappings) {
+    public static void generateMappingTestCommands(List<Mapper> mappings) {
         StringBuilder output = new StringBuilder();
 
-        for (Map.Entry<String, String> entry : mappings.entrySet()) {
-            String originalField = entry.getKey();
-            String mappedField = entry.getValue();
+        for (Mapper entry : mappings) {
+            String originalField = entry.getFrom();
+            String mappedField = entry.getTo();
 
             // Generar el comando de mapeo
             String command = generateCommand(originalField, mappedField);

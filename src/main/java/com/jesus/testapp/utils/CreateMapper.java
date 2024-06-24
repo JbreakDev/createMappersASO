@@ -1,18 +1,19 @@
-package com.jesus.testapp;
+package com.jesus.testapp.utils;
+
+import com.jesus.testapp.model.Mapper;
 
 import java.util.*;
 
 public class CreateMapper {
 
-    public static void generateMappingCommands(Map<String, String> mappings) {
+    private static final String TYPE_FILTER = "STRING";
+
+    public static void generateMappingCommands(List<Mapper> mappings) {
         StringBuilder output = new StringBuilder();
 
-        for (Map.Entry<String, String> entry : mappings.entrySet()) {
-            String originalField = entry.getKey();
-            String mappedField = entry.getValue();
-
+        for (Mapper entry : mappings) {
             // Generar el comando de mapeo
-            String command = generateCommand(originalField, mappedField);
+            final String command = generateCommand(entry);
             output.append(command).append("\n");
         }
 
@@ -20,10 +21,9 @@ public class CreateMapper {
         System.out.println(output.toString());
     }
 
-    private static String generateCommand(String originalField, String mappedField) {
-        String[] sourceParts = originalField.split("\\.");
-        String[] targetParts = mappedField.split("\\.");
-        String sourceObject = "";
+    private static String generateCommand(Mapper mapper) {
+        final String[] sourceParts = mapper.getFrom().split("\\.");
+        final String[] targetParts = mapper.getTo().split("\\.");
 
         StringBuilder sourceMethodCall = new StringBuilder("Optional.ofNullable(cardUpdatePost)");
         StringBuilder targetMethodCall = new StringBuilder("request");
@@ -47,7 +47,10 @@ public class CreateMapper {
         targetMethodCall.append(".set").append(capitalize(targetParts[targetParts.length - 1]));
 
         // Agregar .orElse(null) al final de la cadena de la fuente
-        sourceMethodCall.append(".filter(StringUtils::isNotBlank).orElse(null)");
+        if (TYPE_FILTER.equals(mapper.getType())) {
+            sourceMethodCall.append(".filter(StringUtils::isNotBlank)");
+        }
+        sourceMethodCall.append(".orElse(null)");
 
         return String.format("%s(%s);", targetMethodCall.toString(), sourceMethodCall.toString());
     }
