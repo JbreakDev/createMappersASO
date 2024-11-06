@@ -1,83 +1,45 @@
 package com.jesus.testapp;
 
-import com.jesus.testapp.model.Mapper;
-import com.jesus.testapp.utils.CreateMapper;
-import com.jesus.testapp.utils.CreateMapperTests;
+import com.jesus.testapp.model.Register;
+import com.jesus.testapp.util.RegisterUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 public class Main {
 
-    private static final String MESSAGE_DEFAULT = "Columna fuera de rango";
 
     public static void main(String[] args) throws IOException {
-        final Sheet sheet = readFile();
-        final List<Mapper> mapperList = getMapperList(sheet);
-        printMenu(mapperList);
-    }
+        File archivo = new File ("register.txt");
+        FileReader fr = new FileReader(archivo);
+        BufferedReader br = new BufferedReader(fr);
+        String log = br.readLine();
+        final List<Register> registers = RegisterUtils.getRegisters(log);
+        final String typeRegister = registers.get(0).getValue();
 
-    private static List<Mapper> getMapperList(Sheet sheet) {
-        final List<Mapper> mappers = new ArrayList<>();
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet(typeRegister.substring(0,1));
 
-        for (Row row : sheet) {
-            int columnIndex = 0;
-            final Mapper mapper = new Mapper();
-            for (Cell cell : row) {
-                columnIndex = cell.getColumnIndex();
-                switch (columnIndex) {
-                    case 0:
-                        mapper.setFrom(cell.getStringCellValue());
-                        break;
-                    case 1:
-                        mapper.setTo(cell.getStringCellValue());
-                        break;
-                    case 2:
-                        mapper.setType(cell.getStringCellValue());
-                        break;
-                    default:
-                        System.out.println(MESSAGE_DEFAULT);
-                }
+            // Crear encabezado
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("ID");
+            headerRow.createCell(1).setCellValue("CAMPO");
+            headerRow.createCell(2).setCellValue("VALOR");
+
+            int rowNum = 1;
+            for (Register register : registers) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(register.getId());
+                row.createCell(1).setCellValue(register.getField());
+                row.createCell(2).setCellValue(register.getValue());
             }
-            mappers.add(mapper);
-        }
 
-        return mappers;
-    }
-
-    public static void printMenu(List<Mapper> mappers) {
-        boolean exit = true;
-        Scanner scanner = new Scanner (System.in);
-        int option = 0;
-
-        while (exit) {
-            System.out.println("Elija la opcion deseada");
-            System.out.println("1. Imprimir mappers");
-            System.out.println("2. Imprimir pruebas unitarias");
-            System.out.println("3. Salir");
-            option = scanner.nextInt();
-            switch (option) {
-                case 1:
-                    System.out.println("***************** Mappers *******************");
-                    CreateMapper.generateMappingCommands(mappers);
-                    break;
-                case 2:
-                    System.out.println("******************** Junit Test ********************");
-                    CreateMapperTests.generateMappingTestCommands(mappers);
-                    break;
-                case 3:
-                    exit = false;
-                    break;
+            // Escribir en archivo
+            try (FileOutputStream fileOut = new FileOutputStream("Transaction.xlsx")) {
+                workbook.write(fileOut);
             }
         }
-    }
-
-    public static Sheet readFile() throws IOException {
-        final InputStream inp = new FileInputStream("Mapping.xlsx");
-        final Workbook wb = WorkbookFactory.create(inp);
-        return wb.getSheetAt(0);
     }
 }
